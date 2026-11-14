@@ -37,6 +37,16 @@ final class FriendSearchTests: XCTestCase {
         XCTAssertEqual(FriendSearch.results(query: "  lee ", names: names, loggedToday: []), ["Lee"])
     }
 
+    func testReturnTargetIsNilForBlankQueryEvenWithLogs() {
+        XCTAssertNil(FriendSearch.returnTarget(query: "", names: names, loggedToday: ["Lee"]))
+        XCTAssertNil(FriendSearch.returnTarget(query: "   ", names: names, loggedToday: ["Lee"]))
+    }
+
+    func testReturnTargetIsTopMatch() {
+        XCTAssertEqual(FriendSearch.returnTarget(query: "sam", names: names, loggedToday: []), "Pam Samuels")
+        XCTAssertNil(FriendSearch.returnTarget(query: "zz", names: names, loggedToday: []))
+    }
+
     func testNoMatchesIsEmpty() {
         XCTAssertEqual(FriendSearch.results(query: "zz", names: names, loggedToday: []), [])
     }

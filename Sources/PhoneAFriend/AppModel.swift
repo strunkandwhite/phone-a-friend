@@ -52,6 +52,10 @@ final class AppModel: ObservableObject {
         FriendSearch.results(query: query, names: names, loggedToday: loggedToday)
     }
 
+    func returnTarget(for query: String) -> String? {
+        FriendSearch.returnTarget(query: query, names: names, loggedToday: loggedToday)
+    }
+
     func refresh() {
         let before = state
         let loaded = loader.reload(from: store)

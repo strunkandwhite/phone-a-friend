@@ -24,6 +24,13 @@ public enum FriendSearch {
         return alphabetical(wordStartMatches) + alphabetical(otherMatches)
     }
 
+    /// The friend Return should act on: the top match, or nobody for a blank query. The blank-query
+    /// list is today's logs shown for undo, not matches, so Return must not toggle one of them.
+    public static func returnTarget(query: String, names: [String], loggedToday: Set<String>) -> String? {
+        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        return results(query: query, names: names, loggedToday: loggedToday).first
+    }
+
     private static func fold(_ text: String) -> String {
         text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: nil)
     }

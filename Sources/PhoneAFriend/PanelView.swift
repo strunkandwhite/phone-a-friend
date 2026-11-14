@@ -85,8 +85,8 @@ struct PanelView: View {
                 .textFieldStyle(.roundedBorder)
                 .focused($searchFocused)
                 .onSubmit {
-                    // With no match, keep the text so a typo can be fixed.
-                    guard let topMatch = model.searchResults(for: query).first else { return }
+                    // With no match (or a blank box), do nothing and keep the text so a typo can be fixed.
+                    guard let topMatch = model.returnTarget(for: query) else { return }
                     model.toggleLog(topMatch)
                     query = ""
                 }
