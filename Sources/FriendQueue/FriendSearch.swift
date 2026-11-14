@@ -2,13 +2,10 @@ import Foundation
 
 public enum FriendSearch {
     /// Friends matching `query`, ignoring case and accents, with names where a word starts with
-    /// the query ranked first. An empty query lists the friends logged today, so an undo is
-    /// always one click away.
-    public static func results(query: String, names: [String], loggedToday: Set<String>) -> [String] {
+    /// the query ranked first. A blank query matches nobody.
+    public static func results(query: String, names: [String]) -> [String] {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else {
-            return alphabetical(names.filter { loggedToday.contains($0) })
-        }
+        guard !trimmed.isEmpty else { return [] }
 
         let needle = fold(trimmed)
         var wordStartMatches: [String] = []
@@ -22,13 +19,6 @@ public enum FriendSearch {
             }
         }
         return alphabetical(wordStartMatches) + alphabetical(otherMatches)
-    }
-
-    /// The friend Return should act on: the top match, or nobody for a blank query. The blank-query
-    /// list is today's logs shown for undo, not matches, so Return must not toggle one of them.
-    public static func returnTarget(query: String, names: [String], loggedToday: Set<String>) -> String? {
-        guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
-        return results(query: query, names: names, loggedToday: loggedToday).first
     }
 
     private static func fold(_ text: String) -> String {

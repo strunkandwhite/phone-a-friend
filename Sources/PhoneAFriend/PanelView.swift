@@ -6,7 +6,9 @@ import SwiftUI
 struct PanelView: View {
     @ObservedObject var model: AppModel
     @State private var query = ""
-    @FocusState private var searchFocused: Bool
+
+    private static let resultRowHeight: CGFloat = 24
+    private static let visibleResultRows = 8
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -39,8 +41,6 @@ struct PanelView: View {
     private func panelOpened() {
         model.refresh()
         query = ""
-        // Wait a turn so the panel's window is key before taking focus.
-        DispatchQueue.main.async { searchFocused = true }
     }
 
     @ViewBuilder
@@ -83,22 +83,28 @@ struct PanelView: View {
                 .font(.headline)
             TextField("Type a name…", text: $query)
                 .textFieldStyle(.roundedBorder)
-                .focused($searchFocused)
                 .onSubmit {
                     // With no match (or a blank box), do nothing and keep the text so a typo can be fixed.
-                    guard let topMatch = model.returnTarget(for: query) else { return }
+                    guard let topMatch = model.searchResults(for: query).first else { return }
                     model.toggleLog(topMatch)
                     query = ""
                 }
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(model.searchResults(for: query), id: \.self) { name in
-                        resultRow(name)
-                    }
+            resultsList(model.searchResults(for: query))
+        }
+    }
+
+    // The panel sizes itself to its content, and a ScrollView with only a maximum height
+    // reports no height of its own and collapses to nothing, so give it an explicit one.
+    private func resultsList(_ results: [String]) -> some View {
+        let visibleRows = min(results.count, Self.visibleResultRows)
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(results, id: \.self) { name in
+                    resultRow(name)
                 }
             }
-            .frame(maxHeight: 200)
         }
+        .frame(height: CGFloat(visibleRows) * Self.resultRowHeight)
     }
 
     private func resultRow(_ name: String) -> some View {
@@ -115,7 +121,7 @@ struct PanelView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .padding(.vertical, 3)
+            .frame(height: Self.resultRowHeight)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)

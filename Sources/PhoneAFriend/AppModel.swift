@@ -49,11 +49,7 @@ final class AppModel: ObservableObject {
     var loggedToday: Set<String> { state.loggedToday(today) }
 
     func searchResults(for query: String) -> [String] {
-        FriendSearch.results(query: query, names: names, loggedToday: loggedToday)
-    }
-
-    func returnTarget(for query: String) -> String? {
-        FriendSearch.returnTarget(query: query, names: names, loggedToday: loggedToday)
+        FriendSearch.results(query: query, names: names)
     }
 
     func refresh() {

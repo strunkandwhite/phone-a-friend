@@ -60,12 +60,12 @@ About 300pt wide:
   - A name matches if it contains the query, ignoring case and accents.
   - Order: names that start with the query (any word in the name) come first, then the other matches. Each group is alphabetical.
   - Whitespace around the query is ignored.
-- **Empty query:** the list shows friends logged today, so an undo is always reachable. If nobody has been logged today, no rows are shown.
+- **Empty query:** no rows. To undo a log, search the name again; it shows "✓ today", and clicking it undoes the log. (Owner, after first use: showing today's logs in an empty box was confusing.)
 - Each row is the friend's name, with a trailing "✓ today" if they were contacted today.
   - Clicking a row toggles their log for today, using the existing rule.
   - Logging today's pick is the same as pressing Contacted.
-- **Return** toggles the top match, then clears the field.
-- At most about 8 rows are visible; more rows scroll.
+- **Return** toggles the top match, then clears the field. With no match, or a blank box, it does nothing and keeps the text.
+- At most 8 rows are visible; more rows scroll. The results area gets an explicit height (rows × row height), because the panel sizes itself to its content and a scroll view without one collapses to nothing.
 
 ### Footer
 
@@ -80,13 +80,11 @@ About 300pt wide:
 
 ## Calls (owner to confirm)
 
-- An empty search shows today's logs rather than all friends.
 - Return toggles the top match, so pressing it on someone already logged today undoes the log.
 - Starts-with matches rank above contains matches.
-- The search field gets keyboard focus when the panel opens, if the platform allows it reliably on macOS 13. If not, the field is one click away.
+- The search field does not take keyboard focus when the panel opens (owner, after first use).
 
 ## Left to the builder
 
 - Spacing, fonts and colors beyond what's stated above.
-- How focus is implemented.
 - Whether the search ranking lives in `FriendQueue`. Suggested: yes, as a pure function, so it can be tested on Linux.
