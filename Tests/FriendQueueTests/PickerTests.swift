@@ -7,10 +7,22 @@ final class PickerTests: XCTestCase {
         XCTAssertNil(Picker.choose(from: [], records: [:], using: &generator))
     }
 
-    func testNeverContactedTierBeatsLongAgoContact() {
+    func testNeverTouchedTierBeatsLongAgoContact() {
         var generator = SeededGenerator(seed: 1)
-        let records = ["Old": FriendRecord(lastContacted: d(1)), "New": FriendRecord(lastSkipped: d(20))]
+        let records = ["Old": FriendRecord(lastContacted: d(1))]
         XCTAssertEqual(Picker.choose(from: ["Old", "New"], records: records, using: &generator), "New")
+    }
+
+    func testSkippedNeverContactedFriendGoesToBackOfWholeQueue() {
+        var generator = SeededGenerator(seed: 1)
+        let records = ["Contacted": FriendRecord(lastContacted: d(1)), "Skipped": FriendRecord(lastSkipped: d(2))]
+        XCTAssertEqual(Picker.choose(from: ["Contacted", "Skipped"], records: records, using: &generator), "Contacted")
+    }
+
+    func testSkippedFriendStillBeatsFriendsTouchedMoreRecently() {
+        var generator = SeededGenerator(seed: 1)
+        let records = ["Recent": FriendRecord(lastContacted: d(9)), "Skipped": FriendRecord(lastSkipped: d(2))]
+        XCTAssertEqual(Picker.choose(from: ["Recent", "Skipped"], records: records, using: &generator), "Skipped")
     }
 
     func testWithinTierOldestLastTouchedWins() {
@@ -32,7 +44,7 @@ final class PickerTests: XCTestCase {
         XCTAssertEqual(Picker.choose(from: ["A", "B"], records: records, using: &generator), "A")
     }
 
-    func testNeverTouchedComesBeforeSkippedInTierOne() {
+    func testNeverTouchedComesBeforeSkipped() {
         var generator = SeededGenerator(seed: 1)
         let records = ["Skipped": FriendRecord(lastSkipped: d(4))]
         XCTAssertEqual(Picker.choose(from: ["Skipped", "Fresh"], records: records, using: &generator), "Fresh")

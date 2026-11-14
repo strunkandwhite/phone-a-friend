@@ -137,6 +137,16 @@ final class DailyEngineTests: XCTestCase {
         XCTAssertEqual(state.pick?.friend, other(than: skipped, in: ["A", "B"]))
     }
 
+    func testLastNeverContactedFriendDoesNotReturnDayAfterNotToday() {
+        var state = AppState()
+        state.friends["Alice"] = FriendRecord(lastContacted: d(1))
+        refreshed(&state, ["Alice", "Ben"], d(2))
+        XCTAssertEqual(state.pick?.friend, "Ben")
+        state.setAnswer(.skipped, today: d(2))
+        refreshed(&state, ["Alice", "Ben"], d(3))
+        XCTAssertEqual(state.pick?.friend, "Alice")
+    }
+
     func testClockGoingBackwardsKeepsPick() {
         var state = AppState()
         refreshed(&state, ["A", "B"], d(10))

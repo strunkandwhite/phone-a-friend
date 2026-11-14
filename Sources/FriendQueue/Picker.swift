@@ -1,8 +1,9 @@
 import Foundation
 
 public enum Picker {
-    /// Never-contacted friends come before everyone else; within each group the friend
-    /// touched (contacted or skipped) longest ago wins, and exact ties are broken at random.
+    /// Friends never touched (neither contacted nor skipped) come first; after that, the friend
+    /// touched longest ago wins. Exact ties are broken at random. A skip counts as a touch, so a
+    /// friend who wasn't reached goes to the back of the queue instead of returning the next day.
     public static func choose<G: RandomNumberGenerator>(
         from names: [String],
         records: [String: FriendRecord],
@@ -10,7 +11,7 @@ public enum Picker {
     ) -> String? {
         func priority(_ name: String) -> (tier: Int, lastTouched: DayKey?) {
             let record = records[name] ?? FriendRecord()
-            return (record.lastContacted == nil ? 0 : 1, record.lastTouched)
+            return (record.lastTouched == nil ? 0 : 1, record.lastTouched)
         }
 
         func isHigherPriority(_ a: (tier: Int, lastTouched: DayKey?), than b: (tier: Int, lastTouched: DayKey?)) -> Bool {
