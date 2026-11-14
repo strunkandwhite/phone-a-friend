@@ -53,4 +53,19 @@ public struct AppState: Codable, Equatable {
     public var loginItemInitialized = false
 
     public init() {}
+
+    private enum CodingKeys: String, CodingKey {
+        case version, friends, pick, logDay, logPriors, loginItemInitialized
+    }
+
+    // Missing keys fall back to defaults so state files written by earlier builds still load.
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        version = try container.decodeIfPresent(Int.self, forKey: .version) ?? AppState.currentVersion
+        friends = try container.decodeIfPresent([String: FriendRecord].self, forKey: .friends) ?? [:]
+        pick = try container.decodeIfPresent(DailyPick.self, forKey: .pick)
+        logDay = try container.decodeIfPresent(DayKey.self, forKey: .logDay)
+        logPriors = try container.decodeIfPresent([String: FriendRecord].self, forKey: .logPriors) ?? [:]
+        loginItemInitialized = try container.decodeIfPresent(Bool.self, forKey: .loginItemInitialized) ?? false
+    }
 }
