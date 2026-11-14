@@ -18,6 +18,11 @@ echo "Built $app"
 
 if [[ "${1:-}" == "--install" ]]; then
   pkill -x PhoneAFriend || true
+  # Launching while the old copy is still exiting fails with LaunchServices error -600.
+  for _ in {1..50}; do
+    pgrep -x PhoneAFriend >/dev/null || break
+    sleep 0.1
+  done
   mkdir -p "$HOME/Applications"
   rm -rf "$HOME/Applications/PhoneAFriend.app"
   cp -R "$app" "$HOME/Applications/"
