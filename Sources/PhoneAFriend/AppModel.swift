@@ -77,6 +77,15 @@ final class AppModel: ObservableObject {
         save()
     }
 
+    /// Returns false when the friend was already marked contacted today.
+    func markContacted(_ name: String) -> Bool {
+        let marked = state.markContacted(name, today: today)
+        if marked {
+            save()
+        }
+        return marked
+    }
+
     func openFriendList() {
         NSWorkspace.shared.open(store.friendsURL)
     }

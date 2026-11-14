@@ -248,6 +248,37 @@ final class DailyEngineTests: XCTestCase {
         XCTAssertEqual(state.friends["A"], FriendRecord(lastContacted: d(5)))
     }
 
+    func testMarkContactedLogsOtherFriend() {
+        var state = AppState()
+        state.friends["A"] = FriendRecord()
+        state.friends["B"] = FriendRecord(lastContacted: d(1))
+        refreshed(&state, ["A", "B"], d(5))
+        XCTAssertTrue(state.markContacted("B", today: d(5)))
+        XCTAssertEqual(state.friends["B"]?.lastContacted, d(5))
+        XCTAssertEqual(state.loggedToday(d(5)), ["B"])
+    }
+
+    func testMarkContactedNeverUndoesALog() {
+        var state = AppState()
+        state.friends["A"] = FriendRecord()
+        state.friends["B"] = FriendRecord(lastContacted: d(1))
+        refreshed(&state, ["A", "B"], d(5))
+        state.toggleLog("B", today: d(5))
+        XCTAssertFalse(state.markContacted("B", today: d(5)))
+        XCTAssertEqual(state.friends["B"]?.lastContacted, d(5))
+        XCTAssertEqual(state.loggedToday(d(5)), ["B"])
+    }
+
+    func testMarkContactedOnPickAnswersContacted() {
+        var state = AppState()
+        refreshed(&state, ["A"], d(5))
+        state.setAnswer(.skipped, today: d(5))
+        XCTAssertTrue(state.markContacted("A", today: d(5)))
+        XCTAssertEqual(state.pick?.answer, .contacted)
+        XCTAssertFalse(state.markContacted("A", today: d(5)))
+        XCTAssertEqual(state.pick?.answer, .contacted)
+    }
+
     func testLogsBecomeFinalNextDay() {
         var state = AppState()
         refreshed(&state, ["A", "B"], d(5))

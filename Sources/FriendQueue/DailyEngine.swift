@@ -64,12 +64,21 @@ extension AppState {
         friends[name, default: FriendRecord()].lastContacted = today
     }
 
+    /// Marks a friend contacted today without ever undoing an earlier mark; returns false
+    /// (and changes nothing) when they were already marked today.
+    @discardableResult
+    public mutating func markContacted(_ name: String, today: DayKey) -> Bool {
+        guard !loggedToday(today).contains(name) else { return false }
+        toggleLog(name, today: today)
+        return true
+    }
+
     public var isPending: Bool {
         guard let current = pick else { return false }
         return current.answer == nil
     }
 
-    /// Friends marked contacted today: those logged via the submenu, plus the pick if answered Contacted.
+    /// Friends marked contacted today: those logged through search, plus the pick if answered Contacted.
     public func loggedToday(_ today: DayKey) -> Set<String> {
         var logged = logDay == today ? Set(logPriors.keys) : []
         if let current = pick, current.answer == .contacted {

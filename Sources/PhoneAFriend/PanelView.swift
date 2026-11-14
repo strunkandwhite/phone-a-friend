@@ -6,6 +6,7 @@ import SwiftUI
 struct PanelView: View {
     @ObservedObject var model: AppModel
     @State private var query = ""
+    @State private var confirmation: String?
 
     private static let resultRowHeight: CGFloat = 24
     private static let visibleResultRows = 8
@@ -70,14 +71,30 @@ struct PanelView: View {
         VStack(alignment: .leading, spacing: 6) {
             Text("Log a contact")
                 .font(.headline)
-            TextField("Type a name…", text: $query)
+            TextField("Type a name…", text: Binding(
+                get: { query },
+                set: { newQuery in
+                    query = newQuery
+                    if !newQuery.isEmpty { confirmation = nil }
+                }
+            ))
                 .textFieldStyle(.roundedBorder)
                 .onSubmit {
                     // With no match (or a blank box), do nothing and keep the text so a typo can be fixed.
                     guard let topMatch = model.searchResults(for: query).first else { return }
-                    model.toggleLog(topMatch)
+                    // Return only ever marks; undoing is a deliberate click on a ✓ row.
+                    confirmation = model.markContacted(topMatch)
+                        ? "Marked \(topMatch) as contacted today"
+                        : "\(topMatch) is already marked as contacted today"
                     query = ""
                 }
+            if let confirmation {
+                Text(verbatim: confirmation)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
             resultsList(model.searchResults(for: query))
         }
     }
