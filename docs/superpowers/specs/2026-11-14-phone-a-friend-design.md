@@ -44,7 +44,7 @@ A daily nudge to stay in touch with friends. Once a day, a small macOS menu bar 
 - Leading/trailing whitespace is trimmed. Blank lines and lines starting with `#` are ignored. Duplicate names (exact match after trimming) collapse to one.
 - A friend's identity is their name string. Renaming a line makes a new friend.
 - History is kept for names removed from the file, but they're never suggested. If a name is added back, its history comes back too.
-- The app re-reads the file whenever the menu opens and at each day rollover. It doesn't need to watch the file.
+- The app re-reads the file every minute, at each day rollover and on wake from sleep. It doesn't need to watch the file. SwiftUI's menu bar menu has no reliable "menu opened" hook, so a one-minute timer stands in for one.
 - If the file is missing on first launch, the app creates it with a short `#` comment explaining the format.
 
 ### Each friend's state
