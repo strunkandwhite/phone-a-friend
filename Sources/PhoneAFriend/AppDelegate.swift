@@ -4,8 +4,20 @@ import SwiftUI
 
 /// Owns the menu bar icon and its popover. A popover is anchored to the icon by AppKit and
 /// grows downward as its content changes, which SwiftUI's MenuBarExtra window did not do.
+///
+/// The app starts here with a plain AppKit lifecycle rather than a SwiftUI `App`: a SwiftUI app
+/// must declare a scene, and macOS would show that scene's (empty) window on activation.
+@main
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    static func main() {
+        let application = NSApplication.shared
+        let delegate = AppDelegate()
+        application.delegate = delegate
+        // run() never returns, so `delegate` outlives the application's weak reference to it.
+        application.run()
+    }
+
     private var model: AppModel!
     private var statusItem: NSStatusItem!
     private let popover = NSPopover()
