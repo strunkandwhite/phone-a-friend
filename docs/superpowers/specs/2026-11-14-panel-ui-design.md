@@ -65,7 +65,7 @@ About 300pt wide:
 - Each row is the friend's name, with a trailing "✓ today" if they were contacted today.
   - Clicking a row toggles their log for today, using the existing rule.
   - Logging today's pick is the same as pressing Contacted.
-- **Return** toggles the top match, then clears the field. With no match, or a blank box, it does nothing and keeps the text.
+- **Return** marks the top match as contacted, then clears the field and shows a one-line confirmation: "Marked <name> as contacted today", or "<name> is already marked as contacted today". Return never un-marks; undoing is a click on a "✓ today" row (owner ruling, 2026-11-14). With no match, or a blank box, Return does nothing and keeps the text. The confirmation clears when typing starts.
 - At most 8 rows are visible; more rows scroll. The results area gets an explicit height (rows × row height), because the panel sizes itself to its content and a scroll view without one collapses to nothing.
 
 ### Footer
@@ -81,7 +81,6 @@ About 300pt wide:
 
 ## Calls (owner to confirm)
 
-- Return toggles the top match, so pressing it on someone already logged today undoes the log.
 - The search field does not take keyboard focus when the panel opens (owner, after first use).
 
 ## Left to the builder

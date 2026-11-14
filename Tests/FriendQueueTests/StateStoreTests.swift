@@ -59,27 +59,38 @@ final class StateStoreTests: XCTestCase {
         XCTAssertEqual(store.loadState(), .loaded(expected))
     }
 
+    private let recoveryTime = ISO8601DateFormatter().date(from: "2026-11-14T09:30:05Z")!
+
     func testCorruptStateIsMovedAsideNotDeleted() throws {
         try write("{nope", to: store.stateURL)
-        let corruptURL = directory.appendingPathComponent("state.corrupt.json")
-        XCTAssertEqual(store.loadState(), .recovered(AppState(), movedTo: corruptURL))
-        XCTAssertEqual(try contents(of: corruptURL), "{nope")
+        let backupURL = directory.appendingPathComponent("state.corrupt-20261114-093005.json")
+        XCTAssertEqual(store.loadState(now: recoveryTime), .recovered(AppState(), movedTo: backupURL))
+        XCTAssertEqual(try contents(of: backupURL), "{nope")
         XCTAssertFalse(FileManager.default.fileExists(atPath: store.stateURL.path))
     }
 
-    func testCorruptStateReplacesOlderCorruptCopy() throws {
-        let corruptURL = directory.appendingPathComponent("state.corrupt.json")
-        try write("old junk", to: corruptURL)
-        try write("new junk", to: store.stateURL)
-        XCTAssertEqual(store.loadState(), .recovered(AppState(), movedTo: corruptURL))
-        XCTAssertEqual(try contents(of: corruptURL), "new junk")
+    func testSecondCorruptionKeepsFirstBackup() throws {
+        try write("first junk", to: store.stateURL)
+        guard case let .recovered(_, firstBackup) = store.loadState(now: recoveryTime) else {
+            return XCTFail("expected recovery")
+        }
+        try write("second junk", to: store.stateURL)
+        guard case let .recovered(_, secondBackup) = store.loadState(now: recoveryTime) else {
+            return XCTFail("expected recovery")
+        }
+        XCTAssertNotEqual(firstBackup, secondBackup)
+        XCTAssertEqual(try contents(of: firstBackup), "first junk")
+        XCTAssertEqual(try contents(of: secondBackup), "second junk")
     }
 
-    func testNewerVersionStateIsMovedAside() throws {
-        try write(#"{"version": 99, "friends": {}}"#, to: store.stateURL)
-        guard case .recovered = store.loadState() else {
+    func testNewerVersionStateIsMovedAsideIntact() throws {
+        let newer = #"{"version": 99, "friends": {}}"#
+        try write(newer, to: store.stateURL)
+        guard case let .recovered(_, backup) = store.loadState(now: recoveryTime) else {
             return XCTFail("expected a newer-version state file to be set aside")
         }
+        XCTAssertEqual(try contents(of: backup), newer)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: store.stateURL.path))
     }
 
     func testLoaderReportsNoListBeforeFirstSuccessfulRead() throws {

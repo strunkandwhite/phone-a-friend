@@ -54,7 +54,7 @@ A daily nudge to stay in touch with friends. Once a day, a small macOS menu bar 
 
 ### Picking today's friend
 
-1. **Tier 1:** friends with no `lastContacted`. **Tier 2:** everyone else. Tier 1 is always used before tier 2.
+1. **Tier 1:** friends never touched (no `lastContacted` and no `lastSkipped`). **Tier 2:** everyone else. Tier 1 is always used before tier 2. (Revised by the owner, 2026-11-14: tier 1 was "never contacted", which made the last never-contacted friend come back every day after Not today.)
 2. Within a tier, sort ascending by **last touched** = the later of `lastContacted` and `lastSkipped`, treating "none" as older than any date.
 3. Ties, including all never-touched tier-1 friends, are broken at random.
 4. Today's friend is the first in that order.
@@ -62,7 +62,7 @@ A daily nudge to stay in touch with friends. Once a day, a small macOS menu bar 
 Consequences:
 
 - The first pass through the list is random.
-- **Not today** moves a friend to the back of their own tier without counting as a contact.
+- **Not today** moves a friend to the back of the whole queue without counting as a contact. They come up again after everyone touched before them.
 - After the first pass, the order is longest-since-contact.
 
 The pick is made once per day and stored. Reopening the menu or relaunching the app does not re-roll it.
@@ -118,6 +118,7 @@ If the list was empty when the day started and names are added later, a pick is 
 - With an empty list, the top section reads "No friends yet — add names to your list", the icon stays monochrome, and Contacted/Not today are hidden.
 - No Dock icon (`LSUIElement`).
 - If the list file can't be read, the app keeps using the last list it read successfully and shows a one-line error at the top of the menu. State is never discarded because of a bad read.
+- If `state.json` itself can't be used (corrupt, or written by a newer version), it's moved aside to a uniquely named `state.corrupt-<UTC timestamp>.json` and the app starts fresh with a one-line message naming that file. Backups are never overwritten or deleted. A failed save keeps an error line showing and is retried on every refresh until one succeeds.
 - If registering for Open at login fails, the toggle shows off and the menu shows a one-line note. Once the owner turns it off, later launches don't re-register it. State records that the first-launch registration already happened.
 
 ## Decided by the owner
@@ -134,7 +135,7 @@ If the list was empty when the day started and names are added later, a pick is 
 - Ignoring an unanswered day counts as Not today.
 - Not today ends the day's nudge (icon back to normal), with no same-day replacement.
 - The day's answer can be changed until midnight.
-- Skipped friends go to the back of their own tier via the "last touched" sort, not to the back of the whole list.
+- Skipped friends go to the back of the whole queue via the "last touched" sort (owner ruling, 2026-11-14).
 - File locations: `~/Library/Application Support/PhoneAFriend/friends.txt` and `state.json` alongside it, reachable via "Edit friend list…".
 - The pending icon color is a fixed orange, not the system accent color.
 - Open at login is on by default (registered on first launch via `SMAppService`), with a menu toggle.

@@ -12,6 +12,7 @@ final class AppModel: ObservableObject {
     let store: StateStore
     private var loader = FriendListLoader()
     private var startupError: String?
+    private var saveFailed = false
     private var observers: [NSObjectProtocol] = []
     private var timer: Timer?
 
@@ -28,9 +29,11 @@ final class AppModel: ObservableObject {
             state = AppState()
         case .loaded(let loaded):
             state = loaded
-        case .recovered(let fresh, _):
+        case .recovered(let fresh, let backupURL):
             state = fresh
-            startupError = "State file was unreadable — saved a copy as state.corrupt.json."
+            startupError = backupURL == store.stateURL
+                ? "State file was unreadable and couldn't be set aside."
+                : "State file was unreadable — saved a copy as \(backupURL.lastPathComponent)."
         }
         self.startupError = startupError
         openAtLogin = LoginItem.isEnabled
@@ -55,15 +58,18 @@ final class AppModel: ObservableObject {
     func refresh() {
         let before = state
         let loaded = loader.reload(from: store)
-        errorLine = loader.error ?? startupError
         // Without any successfully read list, refreshing would treat every friend as removed
         // and discard today's pick, so leave the state alone until the file can be read.
-        guard let loaded else { return }
-        names = loaded
-        var generator = SystemRandomNumberGenerator()
-        state.refresh(names: names, today: today, using: &generator)
-        if state != before {
+        if let loaded {
+            names = loaded
+            var generator = SystemRandomNumberGenerator()
+            state.refresh(names: names, today: today, using: &generator)
+        }
+        // A failed save is retried on every refresh until one succeeds.
+        if state != before || saveFailed {
             save()
+        } else {
+            updateErrorLine()
         }
     }
 
@@ -114,9 +120,16 @@ final class AppModel: ObservableObject {
     private func save() {
         do {
             try store.save(state)
+            saveFailed = false
         } catch {
-            errorLine = "Couldn't save state."
+            saveFailed = true
         }
+        updateErrorLine()
+    }
+
+    // A save failure outranks other errors and stays visible until a save succeeds.
+    private func updateErrorLine() {
+        errorLine = saveFailed ? "Couldn't save changes — retrying." : (loader.error ?? startupError)
     }
 
     // The panel refreshes when it opens; these keep the icon's color right while it's closed.
