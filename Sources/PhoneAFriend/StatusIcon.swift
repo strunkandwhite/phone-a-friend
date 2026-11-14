@@ -11,7 +11,7 @@ struct StatusIcon: View {
     // Menu bar icons are normally template images that macOS tints to match the bar; the
     // pending state opts out of that so the orange actually shows.
     static func image(pending: Bool) -> NSImage {
-        let symbol = NSImage(systemSymbolName: "person.wave.2.fill", accessibilityDescription: "Phone a Friend")!
+        let symbol = NSImage(systemSymbolName: "phone.fill", accessibilityDescription: "Phone a Friend") ?? NSImage()
         guard pending else {
             symbol.isTemplate = true
             return symbol

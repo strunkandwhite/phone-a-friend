@@ -1,6 +1,6 @@
 # Phone a Friend
 
-A macOS menu bar app that suggests one friend to text or call each day. Friends you've never contacted come first, in random order; after that, whoever you've gone longest without contacting. The icon stays orange until you answer the day's suggestion.
+A macOS menu bar app that suggests one friend to text or call each day. Friends you've never contacted come first, in random order; after that, whoever you've gone longest without contacting. The phone icon stays orange until you answer the day's suggestion. Clicking it opens a panel with today's friend and a search box for logging contacts with anyone else.
 
 ## Build and install (macOS 13+)
 

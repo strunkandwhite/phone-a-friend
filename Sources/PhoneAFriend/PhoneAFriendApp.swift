@@ -7,10 +7,10 @@ struct PhoneAFriendApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            MenuContent(model: model)
+            PanelView(model: model)
         } label: {
             StatusIcon(pending: model.state.isPending)
         }
-        .menuBarExtraStyle(.menu)
+        .menuBarExtraStyle(.window)
     }
 }

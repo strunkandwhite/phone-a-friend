@@ -48,6 +48,10 @@ final class AppModel: ObservableObject {
 
     var loggedToday: Set<String> { state.loggedToday(today) }
 
+    func searchResults(for query: String) -> [String] {
+        FriendSearch.results(query: query, names: names, loggedToday: loggedToday)
+    }
+
     func refresh() {
         let before = state
         let loaded = loader.reload(from: store)
@@ -106,8 +110,7 @@ final class AppModel: ObservableObject {
         }
     }
 
-    // MenuBarExtra's menu style has no reliable "menu opened" hook, so a one-minute timer
-    // stands in for re-reading the list on open, alongside day-change, time-zone and wake events.
+    // The panel refreshes when it opens; these keep the icon's color right while it's closed.
     private func observeDayChanges() {
         observers.append(NotificationCenter.default.addObserver(
             forName: .NSCalendarDayChanged, object: nil, queue: .main
