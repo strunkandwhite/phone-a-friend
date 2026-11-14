@@ -1,0 +1,10 @@
+# Personal friend list — never commit
+friends.txt
+
+# SwiftPM / build output
+.build/
+.swiftpm/
+build/
+*.app
+
+.DS_Store
