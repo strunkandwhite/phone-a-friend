@@ -1,13 +1,6 @@
 import AppKit
-import SwiftUI
 
-struct StatusIcon: View {
-    let pending: Bool
-
-    var body: some View {
-        Image(nsImage: Self.image(pending: pending))
-    }
-
+enum StatusIcon {
     // Menu bar icons are normally template images that macOS tints to match the bar; the
     // pending state opts out of that so the orange actually shows.
     static func image(pending: Bool) -> NSImage {

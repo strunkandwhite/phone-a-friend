@@ -1,16 +1,11 @@
-import FriendQueue
 import SwiftUI
 
 @main
 struct PhoneAFriendApp: App {
-    @StateObject private var model = AppModel()
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
+    // The status item and popover are owned by AppDelegate; an app needs at least one scene.
     var body: some Scene {
-        MenuBarExtra {
-            PanelView(model: model)
-        } label: {
-            StatusIcon(pending: model.state.isPending)
-        }
-        .menuBarExtraStyle(.window)
+        Settings { EmptyView() }
     }
 }

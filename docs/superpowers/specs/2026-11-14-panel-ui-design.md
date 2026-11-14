@@ -14,6 +14,7 @@ A standard menu can't hold a text field, so the menu becomes a small panel.
 ## Approaches
 
 - **A. Panel (chosen by the owner).** `MenuBarExtra` with `.menuBarExtraStyle(.window)`: a small panel under the icon, built from ordinary SwiftUI views. Today's friend is the headline, the answers are real buttons, and search is a text field. The panel can also refresh when it opens. The cost is a less native look and layout that has to be checked on the Mac.
+  - **Mechanism, revised after first use:** `MenuBarExtra`'s window style didn't stay anchored under the icon. It moved as its content changed height, and sometimes on reopening. The panel is now an `NSPopover` on an `NSStatusItem`, which AppKit anchors to the icon and grows downward. The SwiftUI content is unchanged. A FluidMenuBarExtra-style package was rejected because the project takes no third-party dependencies.
 - **B. Keep the menu.** Today's friend becomes a submenu holding Contacted and Not today. "Log a contact…" opens a separate search window. Rejected: today's friend is still just a menu row, and there would be two UIs to maintain.
 
 ## Icon
@@ -57,8 +58,8 @@ About 300pt wide:
 
 - A search field with the placeholder "Type a name…".
 - **Matching:**
-  - A name matches if it contains the query, ignoring case and accents.
-  - Order: names that start with the query (any word in the name) come first, then the other matches. Each group is alphabetical.
+  - A name matches if it starts with the query, ignoring case and accents. This is the start of the whole name, not of each word (owner, after first use). "sa" finds "Sam Ortiz"; "or" doesn't.
+  - Matches are alphabetical.
   - Whitespace around the query is ignored.
 - **Empty query:** no rows. To undo a log, search the name again; it shows "✓ today", and clicking it undoes the log. (Owner, after first use: showing today's logs in an empty box was confusing.)
 - Each row is the friend's name, with a trailing "✓ today" if they were contacted today.
@@ -81,7 +82,6 @@ About 300pt wide:
 ## Calls (owner to confirm)
 
 - Return toggles the top match, so pressing it on someone already logged today undoes the log.
-- Starts-with matches rank above contains matches.
 - The search field does not take keyboard focus when the panel opens (owner, after first use).
 
 ## Left to the builder

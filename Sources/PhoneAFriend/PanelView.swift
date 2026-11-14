@@ -30,17 +30,6 @@ struct PanelView: View {
         }
         .padding(14)
         .frame(width: 300)
-        .onAppear(perform: panelOpened)
-        // MenuBarExtra keeps its window alive between openings, so onAppear may fire only once;
-        // the panel is the app's only window, so its becoming key marks every opening.
-        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
-            panelOpened()
-        }
-    }
-
-    private func panelOpened() {
-        model.refresh()
-        query = ""
     }
 
     @ViewBuilder

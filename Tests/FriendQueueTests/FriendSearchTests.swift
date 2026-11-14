@@ -9,8 +9,14 @@ final class FriendSearchTests: XCTestCase {
         XCTAssertEqual(FriendSearch.results(query: "   ", names: names), [])
     }
 
-    func testWordStartRanksAboveContains() {
-        XCTAssertEqual(FriendSearch.results(query: "sam", names: names), ["Pam Samuels", "Sam Ortiz", "Rosamund Pike"])
+    func testMatchesOnlyFromStartOfWholeName() {
+        XCTAssertEqual(FriendSearch.results(query: "sa", names: names), ["Sam Ortiz"])
+        XCTAssertEqual(FriendSearch.results(query: "or", names: names), [])
+        XCTAssertEqual(FriendSearch.results(query: "r", names: names), ["Rosamund Pike"])
+    }
+
+    func testMatchesAreAlphabetical() {
+        XCTAssertEqual(FriendSearch.results(query: "s", names: ["Sue", "sam", "Sal"]), ["Sal", "sam", "Sue"])
     }
 
     func testIgnoresCaseAndAccentsBothWays() {
