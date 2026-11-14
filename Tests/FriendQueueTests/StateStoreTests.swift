@@ -82,6 +82,13 @@ final class StateStoreTests: XCTestCase {
         }
     }
 
+    func testLoaderReportsNoListBeforeFirstSuccessfulRead() throws {
+        var loader = FriendListLoader()
+        try FileManager.default.createDirectory(at: store.friendsURL, withIntermediateDirectories: true)
+        XCTAssertNil(loader.reload(from: store))
+        XCTAssertEqual(loader.error, "Couldn't read friends.txt — using the last list.")
+    }
+
     func testLoaderKeepsLastGoodListOnReadFailure() throws {
         var loader = FriendListLoader()
         try write("Sam\n", to: store.friendsURL)

@@ -2,6 +2,7 @@ import AppKit
 import FriendQueue
 import SwiftUI
 
+@MainActor
 struct MenuContent: View {
     @ObservedObject var model: AppModel
 

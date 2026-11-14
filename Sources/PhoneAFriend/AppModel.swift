@@ -50,10 +50,14 @@ final class AppModel: ObservableObject {
 
     func refresh() {
         let before = state
-        names = loader.reload(from: store)
+        let loaded = loader.reload(from: store)
+        errorLine = loader.error ?? startupError
+        // Without any successfully read list, refreshing would treat every friend as removed
+        // and discard today's pick, so leave the state alone until the file can be read.
+        guard let loaded else { return }
+        names = loaded
         var generator = SystemRandomNumberGenerator()
         state.refresh(names: names, today: today, using: &generator)
-        errorLine = loader.error ?? startupError
         if state != before {
             save()
         }
@@ -103,11 +107,18 @@ final class AppModel: ObservableObject {
     }
 
     // MenuBarExtra's menu style has no reliable "menu opened" hook, so a one-minute timer
-    // stands in for re-reading the list on open, alongside day-change and wake events.
+    // stands in for re-reading the list on open, alongside day-change, time-zone and wake events.
     private func observeDayChanges() {
         observers.append(NotificationCenter.default.addObserver(
             forName: .NSCalendarDayChanged, object: nil, queue: .main
         ) { [weak self] _ in
+            Task { @MainActor in self?.refresh() }
+        })
+        observers.append(NotificationCenter.default.addObserver(
+            forName: .NSSystemTimeZoneDidChange, object: nil, queue: .main
+        ) { [weak self] _ in
+            // Darwin caches the system time zone; reset it so "today" follows travel.
+            NSTimeZone.resetSystemTimeZone()
             Task { @MainActor in self?.refresh() }
         })
         observers.append(NSWorkspace.shared.notificationCenter.addObserver(

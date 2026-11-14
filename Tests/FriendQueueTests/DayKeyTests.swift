@@ -23,11 +23,10 @@ final class DayKeyTests: XCTestCase {
         XCTAssertEqual(DayKey(year: 2026, month: 1, day: 1).days(since: DayKey(year: 2026, month: 1, day: 3)), -2)
     }
 
-    func testFromDateUsesGivenCalendarTimeZone() {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "America/Los_Angeles")!
+    func testFromDateUsesGivenTimeZone() {
         let lateEveningInLosAngeles = ISO8601DateFormatter().date(from: "2026-11-15T06:30:00Z")!
-        XCTAssertEqual(DayKey(lateEveningInLosAngeles, calendar: calendar).string, "2026-11-14")
+        XCTAssertEqual(DayKey(lateEveningInLosAngeles, timeZone: TimeZone(identifier: "America/Los_Angeles")!).string, "2026-11-14")
+        XCTAssertEqual(DayKey(lateEveningInLosAngeles, timeZone: TimeZone(identifier: "Europe/Paris")!).string, "2026-11-15")
     }
 
     func testCodableAsBareString() throws {

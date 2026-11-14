@@ -13,8 +13,12 @@ public struct DayKey: Hashable, Comparable, Codable, CustomStringConvertible {
         self.day = day
     }
 
-    public init(_ date: Date, calendar: Calendar = .current) {
-        let components = calendar.dateComponents([.year, .month, .day], from: date)
+    /// The Gregorian day containing `date` in `timeZone`. The system calendar is deliberately
+    /// ignored: a Hebrew or Japanese system calendar would produce keys that don't round-trip.
+    public init(_ date: Date, timeZone: TimeZone = .autoupdatingCurrent) {
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = timeZone
+        let components = gregorian.dateComponents([.year, .month, .day], from: date)
         self.init(year: components.year!, month: components.month!, day: components.day!)
     }
 
