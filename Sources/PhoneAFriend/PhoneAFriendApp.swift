@@ -7,5 +7,6 @@ struct PhoneAFriendApp: App {
     // The status item and popover are owned by AppDelegate; an app needs at least one scene.
     var body: some Scene {
         Settings { EmptyView() }
+            .commandsRemoved()
     }
 }

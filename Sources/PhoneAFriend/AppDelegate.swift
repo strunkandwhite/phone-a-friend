@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem!
     private let popover = NSPopover()
     private var iconSubscription: AnyCancellable?
+    private var escapeMonitor: Any?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         model = AppModel()
@@ -27,6 +28,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .sink { [weak self] pending in
                 self?.statusItem.button?.image = StatusIcon.image(pending: pending)
             }
+
+        // While the search box is being edited it swallows Escape, so close the popover here.
+        escapeMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            let escapeKeyCode: UInt16 = 53
+            guard let self, event.keyCode == escapeKeyCode, self.popover.isShown else { return event }
+            self.popover.performClose(nil)
+            return nil
+        }
     }
 
     @objc private func togglePopover(_ sender: Any?) {
@@ -43,7 +52,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         popover.contentViewController = controller
 
         // A menu bar app isn't active by default; activating lets the search box take typing.
-        NSApp.activate(ignoringOtherApps: true)
+        if #available(macOS 14, *) {
+            NSApp.activate()
+        } else {
+            NSApp.activate(ignoringOtherApps: true)
+        }
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        // AppKit focuses the first text field when the popover's window becomes key; the search
+        // box should wait for a click instead.
+        DispatchQueue.main.async { [weak controller] in
+            controller?.view.window?.makeFirstResponder(nil)
+        }
     }
 }
